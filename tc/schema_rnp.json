@@ -1,0 +1,191 @@
+{
+    "metadata": {
+        "version": "1.0",
+        "caption": "RNP 1",
+        "geo.anchors": [
+            { "lat":0, "lon":0, "id":"POP-AC" }
+        ]
+    }, 
+
+    "registry": {
+        "seconds/format": "yyyy-mm-dd hh:nn:ss",
+        "seconds/origin": "1970-01-01 00:00:01",
+        "geo/length": "25"
+    },
+    
+    "record": {
+        "fields": [
+            { "id":"seconds", "type": "int" }, 
+            { "id":"lat", "type": "double" },
+            { "id":"lon", "type": "double" }, 
+            { "id":"proto", "type": "int", 
+                "aliases" : {
+                    "6": "TCP",
+                    "17": "UDP",
+                    "50": "ESP",
+                    "1": "ICMP"
+                }
+            },
+            { "id":"sport", "type": "int" }, 
+            { "id":"dport", "type": "int" }, 
+            { "id":"ipackets", "type": "int64" }, 
+            { "id":"ibytes", "type": "int" }
+        ]
+    },
+    
+    "dimensions": [
+        { "id": "location", "length": 25, "class": [ "geo", "lat", "lon" ], 
+            "desc": "Geolocalization of Event" },
+
+        { "id": "proto", "class": [ "cat", "proto" ], 
+            "desc": "Protocol", 
+            "caption":"Protocolo", 
+            "uses": [ 1, 6, 17, 47, 50 ],
+            "uses-all": [ 1, 2, 6, 17, 41, 46, 47, 50, 58, 89, 103, 112 ],
+            "catchall": 0,
+            "labels": { 
+                    "0": "OTHERS",
+                    "1": "ICMP", "2":"XXX", "6": "TCP", "17": "UDP", 
+                    "41":"XXX", "46":"XXX", "47": "GRE", 
+                    "50":"ESP", "58":"XXX", "89":"XXX",
+                    "103": "XXX", "112": "XXX"
+            }
+        } 
+    ],
+
+    "terminal": {
+        "contents": [
+            { "id": "sum",  "caption": "Sum(ibyes)", "formula": [ "sum", "ibytes"] } ,
+            { "id": "avg_ibytes",  "formula": [ "avg", "ibytes"] } ,
+            { "id": "avg2",  "formula": [ "avg2", "ibytes", "ipackets"] } ,
+
+            { "id": "hours",  "container": ["binlist", "seconds", "1"],
+                "contents": [
+                    { "id": "hc",   "caption": "Counter", "unity":"flow", "formula":["counter"] },
+                    { "id": "hsum", "caption": "Sum (ibytes)", "unity":"Mb", "formula":[ "sum", "ibytes", "0.000001" ] } ,
+                    { "id": "havg", "caption": "Avg (ibytes)", "unity":"b", "formula":["avg", "ibytes"] },
+                    { "id": "hvar", "caption": "Var (ibytes)", "unity":"b", "formula":["var", "ibytes"] },
+                    { "id": "hmax", "caption": "Max (ibytes)", "unity":"b", "formula":["max", "ibytes"] },
+                    { "id": "hsd",  "caption": "SD (ibytes)", "unity":"b", "formula" :["sd", "ibytes"] }
+                ] 
+            }
+        ]
+    },
+
+    "ml.net" : {
+        "anomaly": [
+            { "alg": "Detect.IidSpike", "params": "95 100", "caption": "IidSpike", "ParamFields": [
+                    { "id": "Confidence", "default": 95},
+                    { "id": "Sliding Window", "default": 100} 
+                ] 
+            },
+            { "alg": "Detect.SpikeBySsa", "params": "95 12 10 3", "caption": "SpikeBySSA", "ParamFields": [
+                    { "id": "Confidence", "default": 95},
+                    { "id": "Sliding Window", "default": 12}, 
+                    { "id": "Training Window", "default": 10}, 
+                    { "id": "Seasonality Window" , "default": 3}
+                ] 
+            },
+            { "alg": "Detect.AnomalyBySrCnn", "params": "51 8 12 7 8", "caption": "AnomalyBySrCnn", "ParamFields": [ 
+                    { "id": "Sliding Window", "default": 51}, 
+                    { "id": "Back Add Window", "default": 8}, 
+                    { "id": "LookAhead Add Window", "default": 12},
+                    { "id": "Averaging Window", "default": 7},
+                    { "id": "Judgement Window", "default": 8} 
+                ] 
+            }
+        ],
+        "prediction": [
+            { "alg": "Prediction.Ols" },
+            { "alg": "Prediction.Lbfs" },
+            { "alg": "Prediction.Sdca"},
+            { "alg": "Prediction.FastTree"},
+            { "alg": "Prediction.GAM"}
+        ]
+    },
+
+    "csv": {
+        "sep": ";",
+        "values": [
+            { "field": "seconds", 
+                "conv": [ "datetime_to_epoch", "seconds", "@format", "@origin" ] 
+            },    
+            { "field": "proto" },  
+            { "field": "sport"},
+            { "field": "dport"},
+            { "field": "ipackets"},
+            { "field": "ibytes"},        
+            { "field": "lat" , 
+                "map-string": {
+                "AC": -9.9563,
+                "AL":-9.66116,
+                "AM":-3.10142,
+                "AP": -0.00609,
+                "BA": -13.00138,
+                "CE": -3.7458,
+                "DF": -15.80416,
+                "DF2": -15.80416,
+                "ES": -20.27694,
+                "GO": -16.67642,
+                "MA": -2.55583,
+                "MG": -19.87,
+                "MG2": -19.87,
+                "MI": 25.78236,
+                "MS": -20.50255,
+                "MT": -15.60812,
+                "PA": -1.475,
+                "PB": -7.21333,
+                "PB2": -7.13728,
+                "PE": -8.05888,
+                "PI": -5.10655,
+                "PR": -25.45061,
+                "RJ": -22.95416,
+                "RN": -5.83961,
+                "RO": -8.83444,
+                "RR": 2.83393,
+                "RS": -30.04083,
+                "RS2": -30.04083,
+                "SC":-27.60138,
+                "SE": -10.91455,
+                "SP": -23.55613,
+                "SP2": -23.55613,
+                "TO": -10.18388
+                }},
+            { "field": "lon" , 
+                "map-string": {
+                "AC":  -67.86543,
+                "AL": -35.74146,
+                "AM": -59.97418,
+                "AP":  -51.08485,
+                "BA":  -38.50749,
+                "CE":  -38.57565,
+                "DF":  -47.88138,
+                "DF2":  -47.88138,
+                "ES":  -40.30444,
+                "GO":  -49.24087,
+                "MA":  -44.30886,
+                "MG":  -43.9647245,
+                "MG2":  -43.9647245,
+                "MI":  -80.19308 ,
+                "MS":  -54.61166,
+                "MT":  -56.06511,
+                "PA":  -48.45555,
+                "PB":  -35.9075,
+                "PB2":  -34.84511,
+                "PE":  -34.95333,
+                "PI":  -42.8113,
+                "PR":  -49.23211,
+                "RJ":  -43.17444,
+                "RN":  -35.20095,
+                "RO":  -63.94,
+                "RR":  -60.69473,
+                "RS":  -51.20666,
+                "RS2":  -51.20666,
+                "SC": -48.51694,
+                "SE":  -37.05449,
+                "SP":  -46.72961,
+                "SP2":  -46.72961,
+                "TO":  -48.3625
+            }}
+    ]}
+}

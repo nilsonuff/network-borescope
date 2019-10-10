@@ -1,0 +1,2399 @@
+<!DOCTYPE html>
+
+<head>
+
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+<meta http-equiv="Pragma" content="no-cache" />
+<meta http-equiv="Expires" content="0" />
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+
+<style type="text/css">
+
+* { margin:0; padding:0; box-sizing:border-box; }
+
+/* 13. Basic Styling with CSS */
+
+/* Style the lines by removing the fill and applying a stroke */
+.line {
+    fill: none;
+    stroke: black; 
+    stroke-width: 0.8;
+}
+
+/* Style the lines by removing the fill and applying a stroke */
+.line_actual {
+    fill: none;
+    stroke: black; 
+    stroke-width:0.8;
+}
+
+/* Style the lines by removing the fill and applying a stroke */
+.line_poly {
+    fill: none;
+    stroke: lime; 
+    stroke-width:0.8;
+}
+
+/* Style the lines by removing the fill and applying a stroke */
+.line_predicted {
+    fill: none;
+    stroke: red; 
+    stroke-width:0.8;
+}
+
+.legendX {
+    font-size: 14px;
+    text-anchor: middle;
+	font-family: "Calibri", "Arial";
+} 
+
+.legendY {
+    font-size: 14px;
+    text-anchor: left;
+	font-family: "Calibri", "Arial";
+} 
+
+
+/* Style the dots by assigning a fill and stroke */
+.dot_predicted {
+    fill: #ffab00;
+    stroke: #fff;
+}
+ 
+.overlay {
+  fill: none;
+  pointer-events: all;
+}
+
+/* Style the dots by assigning a fill and stroke */
+.dot {
+    fill: #ffab00;
+    stroke: #fff;
+}
+  
+.focus circle {
+  fill: none;
+  stroke: steelblue;
+}
+
+.x_axis {
+	font-family: "Calibri", "Arial";
+	font-size: 12px;
+}
+
+.y_axis {
+	font-family: "Calibri", "Arial";
+	font-size: 12px;
+}
+
+
+
+body {
+	margin: 0px;
+	padding: 0px;
+	border: 0px;
+	width: 100%;
+}
+
+#container {
+	position:absolute;
+	width: 100%;
+	height: 100%;
+	display: flex;
+	flex-flow: column;	
+}
+
+#map {
+	width: 100%;
+	flex-grow: 1;
+}
+
+#TopMenu {
+	width:100%; 
+	padding:4px 0px 4px 0px; 
+	alignItems: baseline; 
+	border:0px;
+	background-color: #DED7DA;
+}
+
+#div_cat {
+    position: absolute;
+    top: 40px;
+	width: 23%;
+	right: 20px;
+    z-index: 314159;
+    pointer-events: none;
+	background-color: #DED7DA;
+}
+
+.cat_label {
+	font-family: "Calibri", "Arial";
+	font-size: 14px;
+
+}
+
+
+
+#chart1 {
+	height: 300px;
+	background-color: white;
+}
+
+
+/*----------------------------
+          FORM 
+----------------------------*/
+
+/* The popup form - hidden by default */
+.form-popup {
+  display: none;
+  position: fixed;
+  top: 100px;
+  /* bottom: 0; */
+  / * right: 15px; */
+  border: 3px solid red; /* #f1f1f1; */
+  z-index: 314169;
+}
+
+/* Add styles to the form container */
+.form-container {
+  max-width: 400px;
+  padding: 10px;
+  background-color: white;
+}
+
+/* Full-width input fields */
+.form-container input[type=text], .form-container input[type=password] {
+  width: 100%;
+  padding: 15px;
+  margin: 5px 0 22px 0;
+  border: none;
+  background: #f1f1f1;
+}
+
+/* When the inputs get focus, do something */
+.form-container input[type=text]:focus, .form-container input[type=password]:focus {
+  background-color: #ddd;
+  outline: none;
+}
+
+/* Set a style for the submit/login button */
+.form-container .btn {
+  background-color: #4CAF50;
+  color: white;
+  padding: 16px 20px;
+  border: none;
+  cursor: pointer;
+  width: 100%;
+  margin-bottom:10px;
+  opacity: 0.8;
+}
+
+#mlnetTitle {
+	padding-bottom: 10px;
+}
+
+/* Add a red background color to the cancel button */
+.form-container .cancel {
+  background-color: red;
+}
+
+/* Add some hover effects to buttons */
+.form-container .btn:hover, .open-button:hover {
+  opacity: 1;
+}
+
+</style>
+	<script src="js/tile_helper.js"></script>
+	<script src="js/heatmap_helper.js"></script>
+	
+	<!--- LIBRARY LEAFLET --->
+	<link rel="stylesheet" href="libs/leaflet.css" />
+
+	<script src="libs/leaflet-src.js"></script>
+	<script src="libs/heatmap.js"></script>
+	<script src="libs/leaflet-heatmap.js"></script>
+
+    <link rel="stylesheet" href="src/leaflet.draw.css"/>
+	<script src="src/Leaflet.draw.js"></script>
+    <script src="src/Leaflet.Draw.Event.js"></script>
+
+    <script src="src/Toolbar.js"></script>
+    <script src="src/Tooltip.js"></script>
+
+    <script src="src/ext/GeometryUtil.js"></script>
+    <script src="src/ext/LatLngUtil.js"></script>
+    <script src="src/ext/LineUtil.Intersect.js"></script>
+    <script src="src/ext/Polygon.Intersect.js"></script>
+    <script src="src/ext/Polyline.Intersect.js"></script>
+    <script src="src/ext/TouchEvents.js"></script>
+
+    <script src="src/draw/DrawToolbar.js"></script>
+    <script src="src/draw/handler/Draw.Feature.js"></script>
+    <script src="src/draw/handler/Draw.SimpleShape.js"></script>
+    <script src="src/draw/handler/Draw.Polyline.js"></script>
+    <script src="src/draw/handler/Draw.Marker.js"></script>
+    <script src="src/draw/handler/Draw.Circle.js"></script>
+    <script src="src/draw/handler/Draw.CircleMarker.js"></script>
+    <script src="src/draw/handler/Draw.Polygon.js"></script>
+    <script src="src/draw/handler/Draw.Rectangle.js"></script>
+
+
+    <script src="src/edit/EditToolbar.js"></script>
+    <script src="src/edit/handler/EditToolbar.Edit.js"></script>
+    <script src="src/edit/handler/EditToolbar.Delete.js"></script>
+
+    <script src="src/Control.Draw.js"></script>
+
+    <script src="src/edit/handler/Edit.Poly.js"></script>
+    <script src="src/edit/handler/Edit.SimpleShape.js"></script>
+    <script src="src/edit/handler/Edit.Rectangle.js"></script>
+    <script src="src/edit/handler/Edit.Marker.js"></script>
+    <script src="src/edit/handler/Edit.CircleMarker.js"></script>
+    <script src="src/edit/handler/Edit.Circle.js"></script></head>
+
+	<!--- LIBRARY D3 --->
+	<script src="https://d3js.org/d3.v5.min.js"></script>
+
+<body>
+
+<script>
+
+let global_anomalies = [
+	{ alg: "Detect.IidSpike", params: "95 6" },
+	{ alg: "Detect.SpikeBySsa", params: "95 300 10 3" },
+	{ alg: "Detect.AnomalyBySrCnn", params: "51 8 12 10 8" }
+];
+
+let global_predictions = [
+	{ alg: "Prediction.Ols" },
+	{ alg: "Prediction.Sdca"},
+	{ alg: "Prediction.Lbfs" }
+];
+
+let global_mlnet_alg_name;
+let global_mlnet_params = [];
+
+</script>
+
+
+<div id="container">
+	<div id="TopMenu">
+		<div style="width:10px;display:inline;">&nbsp;</div>
+		<div id="refreshing" style="width:100px;display:inline;font-weight:bold; margin:0px;">REFRESHING</div>
+
+		<select id="resultOptions" onchange="onResultOptions()">
+		</select>
+		
+		<select id="modo" onchange="onVisualizationChange()">
+		<option value="10">Visualization - Full </option>
+		<option value="11">Visualization - Only Polygons</option>
+		</select>
+
+		<input type="button" id="ZoomOut" style="height:18px; text-align: center;" value="Params" onclick="openForm()">
+
+		<select id="trace">
+		<option value="0">Trace</option>
+		<option value="1">Queries</option>
+		</select>
+
+		<select id="bounds" onchange="onBounds()">
+		<option value="0">Update</option>
+		<option value="1">Time</option>
+		</select>
+
+		<input type="button" id="PrevLarge" style="height:18px; text-align: center;" value="<<<" onclick="onClickTime(this.id)">
+		<input type="button" id="PrevMidi" style="height:18px; text-align: center;" value="<<" onclick="onClickTime(this.id)">
+		<input type="button" id="PrevSmall" style="height:18px; text-align: center;" value="<" onclick="onClickTime(this.id)">
+
+		<input type="button" id="NextSmall" style="height:18px; text-align: center;" value=">" onclick="onClickTime(this.id)">
+		<input type="button" id="NextMidi" style="height:18px; text-align: center;" value=">>" onclick="onClickTime(this.id)">
+		<input type="button" id="NextLarge" style="height:18px; text-align: center;" value=">>>" onclick="onClickTime(this.id)">
+
+		<input type="button" id="ZoomIn" style="height:18px; text-align: center;" value="[ + ]" onclick="onClickTime(this.id)">
+		<input type="button" id="ZoomOut" style="height:18px; text-align: center;" value="[ - ]" onclick="onClickTime(this.id)">
+
+	</div>
+
+	<div id="map"> </div>
+
+	<div id="div_cat" class="row-fluid overlay">
+		<!-- <svg id="svg-cat" > </svg> -->
+	</div>
+
+	<div id="chart1" style="padding:0px" > </div>
+	</div>
+
+</div>
+
+<div class="form-popup" id="mlnetDiv">
+  <form action="/action_page.php" class="form-container" id="mlnetForm">
+  </form>
+</div>
+
+
+<script>
+	let ts_std_height = 200;
+	let ts_margin = {top: 10, right: 20, bottom: 40, left: 70}
+	let cat_margin = {top: 10, right: 4, bottom: 40, left: 70}
+
+	let global_schema_info
+	let global_schema_categories = []
+	
+	let global_mlnet_cmdline
+
+	let global_query_selected_channel = "hsum"
+
+	let global_result_title = "ibytes"
+	let global_result_unity = "b"
+	
+	let global_query_category_index = 0
+	
+	let global_visualization_mode = 0
+	let global_visualization_submode = 0
+	
+	let global_anomaly_circle_radius = 4
+	let global_min_height_space = 25;
+
+	let global_query_geo_fieldname = "location"
+	let global_geo_extra_zoom = 5
+	
+	let global_very_large_number = 200000000000000
+	let global_time_zone = -3
+	
+	let global_refresh_interface
+	let global_query_ts_fieldname  = "hours"
+	let global_query_category_fieldname = "proto"
+
+	let global_ts_t0 = 1565101800;
+	let global_ts_t1 = 1565102130;
+
+	let global_trace_mode = 0
+	
+	let query_ts_color = "#606060"
+	
+	
+	let current_heatmapLayer
+
+	var parse = d3.timeParse("%s");
+	let fp = d => parse(d - global_time_zone * 3600)
+
+	
+	var heatCfg = {
+	  // radius should be small ONLY if scaleRadius is true (or small radius is intended)
+	  // if scaleRadius is false it will be the constant radius used in pixels
+	  "radius": 15.,
+	  "maxOpacity": 1.0,
+	  // scales the radius based on map zoom
+	  "scaleRadius": false,
+	  // if set to false the heatmap uses the global maximum for colorization
+	  // if activated: uses the data maximum within the current map boundaries
+	  //   (there will always be a red spot with useLocalExtremas true)
+	  "useLocalExtrema": false,
+	  // which field name in your data represents the latitude - default "lat"
+	  latField: 'lat',
+	  // which field name in your data represents the longitude - default "lng"
+	  lngField: 'lng',
+	  // which field name in your data represents the data value - default "value"
+	  valueField: 'count',
+		gradient: {
+			// enter n keys between 0 and 1 here
+			// for gradient color customization
+			'.1': '	#00008B',
+			'.2': 'blue',
+			'.4': 'red',
+			'.75': 'yellow',
+			'.90': 'white'
+		  }	  
+	};
+
+	
+	function compute_best_unity(mn, mx) {
+		let div = 1
+		let potencia = 0
+		for (i = 0; i < 20; i++) {
+			if (mx/div < 100) {
+				break;
+			}
+			potencia ++
+			div *= 10
+		}
+		potencia -= potencia % 3
+		div = 1; for (i=0;i<potencia;i++) div *= 10
+		
+		let prefixos = [ "", "K x ", "M x ", "G x ", "T x ", "E x ", "P x " ]
+		let prefixo = prefixos[potencia/3]
+
+		let res = { prefix: prefixo, div: div }
+		
+		// logaritmica ou nao
+		if (mn && mx/(mn+1) > 1000) {
+			res.log = 1
+		} else {
+			res.log = 0
+		}
+
+		return res
+	}
+
+	//********************************************************************
+	//
+	//  ML.NET Form
+	//
+	//********************************************************************
+
+	function closeForm() {
+		document.getElementById("mlnetDiv").style.display = "none";
+	}
+
+	function submitForm() {
+		let ml = global_schema_info["ml.net"]
+		if (!ml) return;
+		
+		let id_anomaly = this.id_anomaly || 0
+		
+		let anomaly = ml.anomaly[id_anomaly]
+		let param_fields = anomaly.ParamFields
+
+		global_mlnet_params = []
+		for (i = 0; i<param_fields.length; i++) {
+			input = document.getElementById("id_ml_input_"+i);
+			global_mlnet_params.push(input.value)
+		}
+		document.getElementById("mlnetDiv").style.display = "none";
+	}
+
+	function openForm(id_anomaly) {
+		let ml = global_schema_info["ml.net"]
+		if (!ml) return;
+		
+		id_anomaly = id_anomaly || global_visualization_submode || 0
+		let anomaly = ml.anomaly[id_anomaly]
+		
+		let param_fields = anomaly.ParamFields
+		if (!param_fields) return;
+		
+		let div = document.getElementById("mlnetDiv")
+		
+		div.style.top = ""+(document.getElementById("TopMenu").offsetHeight + 2) + "px"
+		div.style.left = "350px"
+		
+		f = document.getElementById("mlnetForm")
+		f.innerHTML = ""
+		
+		let h1 = document.createElement("h1")
+		h1.id = "mlnetTitle"
+		h1.append(anomaly.alg)
+		f.appendChild(h1)
+		
+		let label, text, input, b
+
+		for (i = 0; i<param_fields.length; i++) {
+			input = document.createElement("input");
+			input.type = "text";
+			input.name = "ml_input_"+i;
+			input.value = param_fields[i]["default"]
+			input.id = "id_ml_input_"+i;
+			f.appendChild(input);
+
+			label = document.createElement("label");
+			label.htmlFor = "ml_input_"+i
+			label.name = "ml_label_"+i
+
+			text  = document.createTextNode(param_fields[i].id);
+			label.appendChild(text)
+			
+			f.insertBefore(label,input)
+		}
+		
+		b = document.createElement("input");
+		b.className = "btn"
+		b.type = "button";
+		b.value = "Gravar";
+		b.onclick = submitForm
+		b.id_anomaly = id_anomaly
+		f.appendChild(b);
+		
+		b = document.createElement("input");
+		b.className = "btn cancel"
+		b.type = "button";
+		b.value = "Fechar";
+		b.onclick = closeForm
+		f.appendChild(b);
+		
+		div.style.display = "block";
+		
+	}
+
+	/*
+	let mlnetDiv = document.getElementById("mlnetDiv")
+	window.onclick = function(event) {
+	  if (event.target == container) {
+		mlnetDiv.style.display = "none";
+	  }
+	}
+	*/
+	
+	//********************************************************************
+	//
+	//  query_create functions
+	//
+	//********************************************************************
+
+	//-----------------
+	//
+	//
+	//
+	//
+	function query_create_between_time(fieldname) {
+		fieldname = (fieldname == undefined)?global_query_ts_fieldname:fieldname
+		let s = '["@", "between", {0}, {1}]'.replace('@',name)
+		s =  s.replace('{0}',global_ts_t0.toString()).replace('{1}',global_ts_t1.toString())
+		// console.log(s)
+		return s
+	}
+
+	//-----------------
+	//
+	//
+	//
+	//
+	function query_create_zrect(zoom, bounds, fieldname) {
+		fieldname = (fieldname == undefined)?global_query_geo_fieldname:fieldname
+		let c0 = bounds._northEast
+		let c1 = bounds._southWest
+		let s = '["@", "zrect", #, {0}, {1}, {2}, {3}]'
+			.replace('@',fieldname)
+			.replace('#',zoom)
+			.replace('{0}',c0.lat)
+			.replace('{1}',c1.lng)
+			.replace('{2}',c1.lat)
+			.replace('{3}',c0.lng)
+		//console.log("zBounds: ",s)
+		return s
+	}
+
+	//-----------------
+	//
+	//
+	//
+	//
+	function query_create_zpoly(zoom, poly,fieldname) {
+		fieldname = (fieldname == undefined)?global_query_geo_fieldname:fieldname
+		let s = '["@", "zpoly", #, '
+			.replace('@',fieldname)
+			.replace('#',zoom)
+		let sep = ''
+		for (let i = 0; i<poly.length; i++) {
+			s = s + sep + poly[i][0] + ',' + poly[i][1];
+			sep = ', '
+		}
+		s = s + ']'
+		//console.log("poly: ",s)
+		return s
+	}
+
+	//-----------------
+	//
+	//
+	//
+	//
+	function query_create_map_where_body(map, geofieldname) {
+		let zoom = map.getZoom() - 1 + global_geo_extra_zoom
+		let bounds = map.getBounds()
+		let s = '"where": [ $1'
+			.replace('$1',query_create_zrect(zoom,bounds,geofieldname))
+		return s
+	}
+
+	//-----------------
+	//
+	//
+	//
+	//
+	function query_create_poly_where_body(map, geofieldname, poly) {
+		let zoom = map.getZoom() - 1 + global_geo_extra_zoom
+		let s = '"where": [ $1'
+			.replace('$1',query_create_zpoly(zoom,poly,geofieldname))
+		//console.log("poly: ",s)
+		return s
+	}
+
+
+	//-----------------
+	//
+	//
+	//
+	//
+	function query_end_query(qs,id) {
+	
+		let s = qs + "]" + ((id == undefined)? "": ', "id": '+id) + "}"
+		// console.log("query:",s)
+		return s
+	}
+
+
+
+	//********************************************************************
+	//
+	// mymap initialization
+	//
+	//********************************************************************
+	var baseLayer = L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token=pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4NXVycTA2emYycXBndHRqcmZ3N3gifQ.rJcFIG214AriISLbB6B5aw', {
+		maxZoom: 17,
+		attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors, ' +
+			'<a href="https://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, ' +
+			'Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
+		id: 'mapbox.light'
+	});
+
+	var mymap = L.map('map', { layers: [ baseLayer ] });
+	
+	// polygon
+	var poly_sul = [
+		//[-17.385044, -38.486671], [-16.506174, -40.648015], [-17.686816, -43.218482],
+		[-31.5206, -53.7327], 
+		[-31.5206, -49.7592],
+		[-24.8305, -44.9774],
+		[-24.3179, -50.7351]
+	];
+
+	let poly_norte = [
+		//[-17.385044, -38.486671], [-16.506174, -40.648015], [-17.686816, -43.218482],
+		[ 6, -73.0], 
+		[ 6, -45.0],
+		[-6.6, -47.8],
+		[-13.5, -60.7],
+		[-9.6, -73.0]
+		
+	];
+	
+	
+	//*************************************************************************
+	//
+	//  view control: submit queries, dispatch results
+	//
+	//*************************************************************************
+	let viewQueries = []
+	let idQueries = []
+	let view_pendings = 0
+	let view_refreshing_pending = 0
+	
+	function view_reset_queries() {
+		viewQueries = []
+		view_pendings = 0
+		if (global_trace_mode > 0) {
+			console.log("----------------------------------------\n\n")
+		}
+	}
+	
+	//-----------------
+	//
+	//
+	//
+	//
+	function view_add_begin(handle_reply_function, dom_id, info) {
+		let view = {
+			id: dom_id,
+			handle_reply_function: handle_reply_function,
+			count: 0,
+			queries: [],
+			pending: 0,
+			info: info,
+			jsons : []
+		}
+		viewQueries.push(view);
+		return viewQueries.length - 1;
+	}
+	
+	
+
+	//-----------------
+	//
+	//
+	//
+	//
+	function view_add_query(id_view, query, info) {
+		let v = viewQueries[id_view]
+		
+		idQueries.push(v)
+		let id_query = idQueries.length
+		
+		let q = {
+			info : info,
+			query: query_end_query(query,id_query),
+			id   : id_query
+		}
+		
+		v.queries.push(q)
+		
+		v.count ++
+		v.pending ++
+	}
+	
+	let view_timeout_handle  = 0
+	
+	//-----------------
+	//
+	//
+	//
+	//
+	function view_alter_pendings(inc) {
+		let e = document.getElementById("refreshing")
+		view_pendings += inc;
+		if (inc < 0) {
+			if (view_pendings>0) return true;
+			view_pendings = 0;
+			if (view_refreshing_pending) {
+				view_refreshing_pending = 0
+				//console.log("End refreshing pending! Delaying refresh")
+				view_timeout_handle = setTimeout(
+					function () { 
+						view_timeout_handle = 0; 
+						//console.log("Delayed refresh")
+						global_refresh_interface()
+					}, 100)
+			}
+			// mostra normal
+			e.style.background = "white"
+			e.style.color = "black"
+		} else if (inc > 0) {
+			if (view_pendings>1) return true;
+			// mostra highligth
+			e.style.background = "red";
+			e.style.color = "yellow"
+		} else {
+			if (view_pendings > 0) {
+				view_refreshing_pending ++
+				//console.log("refreshing pending",view_refreshing_pending)
+				return false
+			}
+			if (view_timeout_handle != 0) {
+				//console.log("clearTimeout")
+				clearTimeout(view_timeout_handle)
+				view_timeout_handle = 0
+			}
+			//e.style.background = "white"
+			//e.style.color = "black"
+		}
+		return true
+	}
+
+	//-----------------
+	//
+	//
+	//
+	//
+	function view_add_end(id_view) {
+		let v = viewQueries[id_view]
+		for (let i = 0; i < v.queries.length; i++) {
+			let xhttpView = new XMLHttpRequest();
+			xhttpView.onreadystatechange = function() {
+				if (this.readyState == 4) {
+					view_alter_pendings(-1)
+					if (this.status == 200) {
+						let s = this.responseText
+						if (global_trace_mode > 0) console.log(s)
+						let json = JSON.parse(s)
+						if (json != undefined) {
+							let id_query = json.id - 1
+							let v = idQueries[id_query]
+							v.jsons.push(json)
+							v.pending --;
+							if (v.pending == 0) {
+								if(v.handle_reply_function != undefined) v.handle_reply_function(v);
+							}
+						}
+					}
+				}
+			};
+			xhttpView.open("POST", "/jsonquery", true);
+			s = v.queries[i].query
+			if (global_trace_mode > 0) console.log(s)
+			xhttpView.send(s);
+			view_alter_pendings(1)
+		}
+	}
+	
+	
+	//********************************************************************
+	//
+	//  Geo
+	//
+	//********************************************************************
+
+	//-----------------
+	//
+	//
+	//
+	//
+	function geo_create_map_query(map, geofieldname, timefieldname) {
+		let s = '{"select": ["##"], "group-by": "@", "group-by-output": "kcent", $2, [ "$1", "between", $3, $4]'
+			.replace('##',global_query_selected_channel)
+			.replace('@',geofieldname)
+			.replace('$1',timefieldname)
+			.replace('$2',query_create_map_where_body(map,geofieldname))
+			.replace('$3',global_ts_t0)
+			.replace('$4',global_ts_t1)
+		//console.log("std time series:",s)
+		return s
+	}
+
+	
+	//-----------------
+	//
+	//
+	//
+	//
+	function geo_on_reply(view) {
+		let map = view.info.map
+		let json = view.jsons[0]
+		
+		let a = [];
+		let max_v = 0
+		let min_v = global_very_large_number  
+		let zoom = map.getZoom() - 1
+		let b = map.getBounds()
+		let o
+		for (let i=0; i<json.result.length; i++)  {
+			let o = json.result[i]
+			let vlat = tile2latX(o.k[0],zoom+global_geo_extra_zoom)
+			let vlon = tile2longX(o.k[1],zoom+global_geo_extra_zoom)
+			let coords = lat_lon_nearest(vlat, vlon)
+			vlat = coords[0]
+			vlon = coords[1]
+			if (!b.contains(L.latLng(vlat, vlon))) continue;
+			let v = Math.log(o.v[0]+1)
+			o.v[0] = o.v[0]/1000000000
+			if (v > max_v) max_v = v
+			if (v < min_v) min_v = v
+			o2 = { lat: vlat, lng: vlon, count: v }
+			a.push(o2)
+		}
+		
+		let heatData = {}
+		heatData.min = min_v
+		heatData.max = max_v
+		heatData.data = a
+		
+		if (current_heatmapLayer != undefined) {
+			current_heatmapLayer.setData(heatData);
+
+		} else {
+			current_heatmapLayer = new HeatmapOverlay(heatCfg);
+			current_heatmapLayer.setData(heatData);
+			map.addLayer(current_heatmapLayer);
+		}
+	}
+	
+	
+	//-----------------
+	//
+	//
+	//
+	//
+	function geo_refresh_chart () {
+		//
+		// Heatmap chart
+		//
+		let vi = view_add_begin(geo_on_reply, "tinymap", {map: mymap})
+		let qxx = geo_create_map_query(mymap, "location", global_query_ts_fieldname)
+		view_add_query(vi, qxx)
+		view_add_end(vi)
+	}
+
+	//********************************************************************
+	//
+	//  Category
+	//
+	//********************************************************************
+	
+
+	//-----------------
+	//
+	//
+	//
+	//
+	function cat_create_map_query(map, geofieldname, timefieldname) {
+		if (global_query_category_fieldname == "" || global_query_category_fieldname == undefined) return undefined;
+		
+		let s = '{"select": ["##"], "group-by": "$1", "group-by-output": "kv", $2, ["$1", "between", $3, $4]'
+			.replace('##',global_query_selected_channel)
+			.replace('$1',global_query_category_fieldname)
+			.replace('$1',timefieldname)
+			.replace('$2',query_create_map_where_body(map,geofieldname))
+			.replace('$3',global_ts_t0)
+			.replace('$4',global_ts_t1)
+		return s
+	}
+
+	//-----------------
+	//
+	//
+	//
+	//
+	function cat_create_polygon_query(map, geofieldname, timefieldname,poly) {
+		if (global_query_category_fieldname == "" || global_query_category_fieldname == undefined) return undefined;
+		let s = '{"select": ["##"], "group-by": "$1", "group-by-output": "kv", $2, ["$1", "between", $3, $4]'
+			.replace('##',global_query_selected_channel)
+			.replace('$1',global_query_category_fieldname)
+			.replace('$1',timefieldname)
+			.replace('$2',query_create_poly_where_body(map,geofieldname,poly))
+			.replace('$3',global_ts_t0)
+			.replace('$4',global_ts_t1)
+		return s
+	}
+
+	//-----------------
+	//
+	//
+	//
+	//
+	function cat_on_reply(view) {
+		let i, j, k
+		let ts_times
+		let colors = []
+		let mx, mn
+		
+		let cats_values = []
+		let cat_label = []
+		let values = []
+		let n_cats = 0
+		let max_cat = 0
+		
+		let qcat = global_schema_categories[global_query_category_index]
+		if (qcat == undefined) return
+		
+		view.jsons.sort(function (a,b) { return a.id < b.id? -1: a.id > b.id? 1: 0} )
+		
+		for (i = 0; i<view.count; i++) {
+			let js = view.jsons[i];
+			for (j = 0; j < js.result.length; j++) {
+				
+				let cat = js.result[j].k[0]
+				
+				// nao usa o valor da categoria?
+				if (qcat.uses && qcat.uses.indexOf(cat) == -1) continue; 
+				
+				// cria nova entrada?
+				if (cats_values[cat] == undefined) {
+					n_cats ++
+					cats_values[cat] = []
+					for (k=0; k < view.count; k++) cats_values[cat].push(0)
+					
+					let label = qcat.labels[cat] 
+					cat_label[cat] = (!label) ? "UNDEF" : label
+				} 
+
+				if (cat > max_cat) max_cat = cat
+
+				let v = js.result[j].v[0]
+				cats_values[cat][i] = v
+				if (mn == undefined || (v > 0 && v < mn)) mn = v
+				if (mx == undefined || (v > mx)) mx = v
+			}
+			colors.push(view.queries[i].info.color)
+		}
+		if (mn == 0) mn = 1
+	
+		// compute exibition bars
+		let bars_values = []
+		let bar_cat = []
+		let cat_colors = []
+		for (cat=0; cat <= max_cat; cat++) {
+			if (cats_values[cat] != undefined) {
+				for (j=0;j<view.count;j++) {
+					bars_values.push(cats_values[cat][j])
+					bar_cat.push(cat)
+					cat_colors.push(colors[j])
+				}
+			}
+		}
+		
+		// computes the best unity
+		best_unity = compute_best_unity(mn,mx)
+		// console.log(best_unity)
+		
+		let prefixo = best_unity.prefix
+		let div = best_unity.div
+		
+		let LogString 
+		let unity 
+		if (best_unity.log) {
+			LogString = "Log "
+			unity = view.info.unity
+		} else {
+			LogString  = ""
+			unity = prefixo + view.info.unity
+		}
+		
+		let title = view.info.title
+		
+		let y_legend = title + " [" + LogString + unity + "]"
+		
+		let min_bar_size = 20
+		let row_height = 20
+		let n_bars = n_cats * view.count
+		let bar_height = min_bar_size * n_bars ;
+		let bar_total_height = bar_height + 2 * row_height;
+		
+		let svg_width = 250;
+		let svg_height = bar_height;
+		
+		let divcat = d3.select(view.id) 
+		divcat.style.height = "" + bar_total_height + "px"
+		let cur_width = document.getElementById("div_cat").offsetWidth
+
+		let left_margin = 70
+		let right_margin = 10
+		let bar_width = cur_width-left_margin-right_margin
+		
+		let xScaleFunction
+		let conv_d
+		if (best_unity.log) {
+			xScaleFunction =  d3.scaleLog
+			mn = mn + 1
+			conv_d = Math.log10
+		} else {
+			xScaleFunction =  d3.scaleLinear
+			conv_d = (d) => d/div
+		}
+		
+		
+		let xscale = xScaleFunction()
+						.domain([mn,mx])
+						.nice()
+						.range([0,bar_width]);
+
+		let yscale = d3.scaleLinear()
+						.domain([0,n_bars])
+						.range([0,svg_height]);
+
+		d3.select(view.id).select("svg").remove()
+		
+		let canvas = d3.select(view.id)
+						.append('svg')
+						.attr("id", "cat-svg")
+						.attr("fill","green")
+						.attr("width","100%")
+						.attr("height",""+bar_total_height +"px")
+
+		let chart = canvas.append('g')
+							.attr("transform", "translate(70,"+row_height+")")
+							.attr('id','bars_values')
+							.selectAll('rect')
+							.data(bars_values)
+							.enter()
+							.append('rect')
+							.style('fill', (d,i) => cat_colors[i])
+							.attr('height',min_bar_size)
+							.attr('width', function(d,i){ let v = xscale(d); v = (v<=0)?1:v; return v; })
+							.attr('x', 0)
+							.attr('y', function(d,i){ let v = yscale(i); return yscale(i); })
+
+		canvas.append("g")
+			.selectAll('text')
+			.data(bars_values)
+			.enter()
+			.append("text")
+			.attr('x', 10)
+			.attr('y', function(d,i){ let v = yscale(i); return yscale(i) + 16 + row_height; })
+			.attr("fill",'black')
+			.attr("font-size",'12px')
+			.text(function(d,i) { return cat_label[bar_cat[i]]} ) 
+
+		canvas.append("g")
+			.attr("transform", "translate("+left_margin+"," + "" + ( bar_total_height - 1 * row_height ) + ")")
+			.call(d3.axisBottom(xscale).tickFormat(function(d){ return conv_d(d);}).ticks(4)) 
+
+		canvas.append("rect")
+			.attr("x", left_margin +1) 
+			.attr("y", row_height +1 ) 
+			.attr("width",bar_width)
+			.attr("height",bar_height)
+			.attr("opacity",0.5)
+			.attr("fill","none")
+			.attr("stroke", "black")            
+			
+			
+		canvas.append("text")                                   
+			.attr("x", left_margin +  bar_width / 2 - 40) 
+			.attr("y", row_height - cat_margin.top + 4 ) 
+			.attr("fill",'black')
+			.attr("class",'cat_label')
+			.text(y_legend);                    		
+
+	}
+	
+
+	//-----------------
+	//
+	//
+	//
+	//
+	function cat_refresh_chart (only_polygons) {
+		//
+		// Category chart
+		//
+		if (global_query_category_fieldname == undefined) return;
+		
+		let vi = view_add_begin(cat_on_reply, "#div_cat", {unity: global_result_unity, title: global_result_title})
+		
+		let count = 0;
+		let qxx;
+		
+		// Visualization Categories
+		if (!only_polygons) {
+			qxx = cat_create_map_query(mymap, "location", global_query_ts_fieldname)
+			view_add_query(vi, qxx, { color: query_ts_color })
+			count ++;
+		}
+		
+		//
+		// Category polygons
+		//
+		let layer
+		mymap.eachLayer((layer) => {
+			if(layer instanceof L.Polygon) {
+
+				// transforms latlngs in poly
+				let poly = []
+				let latlngs = layer._latlngs[0]
+				for (i = 0; i < latlngs.length; i++) {
+					poly.push([latlngs[i].lat, latlngs[i].lng])
+				}
+				let color = layer.options.color
+				color = (color != undefined) ? color : "black"
+
+				//console.log(poly);
+				// poly category
+				qxx = cat_create_polygon_query(mymap, "location", global_query_ts_fieldname, poly)
+				view_add_query(vi, qxx, { color: color })
+				count ++;
+			}
+		});	
+		
+		if (!count) {
+			qxx = cat_create_map_query(mymap, "location", global_query_ts_fieldname)
+			view_add_query(vi, qxx, { color: query_ts_color })
+		}
+		
+		view_add_end(vi)
+	}
+	
+	//********************************************************************
+	//
+	//  TimeSeries
+	//
+	//********************************************************************
+	
+	//-----------------
+	//
+	//
+	//
+	//
+	function ts_create_map_query(map, geofieldname, timefieldname) {
+		let s = '{"select": ["##"], "group-by": "$1", "group-by-output": "full", $2, ["$1", "between", $3, $4]'
+			.replace('##',global_query_selected_channel)
+			.replace('$1',timefieldname)
+			.replace('$1',timefieldname)
+			.replace('$2',query_create_map_where_body(map,geofieldname))
+			.replace('$3',global_ts_t0)
+			.replace('$4',global_ts_t1)
+		//console.log("std time series:",s)
+		return s
+	}
+
+	//-----------------
+	//
+	//
+	//
+	//
+	function ts_create_polygon_query(map, geofieldname, timefieldname,poly,full) {
+		let output = (full)? "full" : "v-lists"
+		let s = '{"select": ["##"], "group-by": "$1", "group-by-output": "$output$", $2, ["$1", "between", $3, $4]'
+			.replace('##',global_query_selected_channel)
+			.replace('$1',timefieldname)
+			.replace('$1',timefieldname)
+			.replace('$2',query_create_poly_where_body(map,geofieldname,poly))
+			.replace('$3',global_ts_t0)
+			.replace('$4',global_ts_t1)
+			.replace('$output$',output)
+		//console.log("std time series:",s)
+		return s
+	}
+
+
+	//-----------------
+	//
+	//
+	//
+	//
+	function ts_on_reply(view) {
+		let domId = view.id.substring(1,100)
+		let i, j
+		let ts_times
+		let values = []
+		let colors = []
+		let mx, mn
+
+		for (i = 0; i<view.count; i++) {
+			let js = view.jsons[i];
+			if (js.tp != 5) {
+				ts_times = js.result.ks[0]
+			}
+			for (j = 0; j < view.count; j++) {
+				if (js.id == view.queries[j].id) {
+					colors.push(view.queries[j].info.color)
+					break;
+				}
+			}
+			
+			let vs = js.result.vs[0]
+			values.push(vs)
+
+			let m
+			m = d3.max(vs)
+			if (mx == undefined || m > mx) mx = m
+			m = d3.min(vs)
+			if (mn == undefined || m < mn) mn = m
+		}
+		
+		// computes the best unity
+		best_unity = compute_best_unity(mn,mx)
+		let prefixo = best_unity.prefix
+		let div = best_unity.div
+		
+		let unity = prefixo + view.info.unity
+		let title = view.info.title
+		let y_legend = title + " [" + unity + "]"
+	
+		let e = document.getElementById(domId)
+		let width = e.offsetWidth
+		let drawWidth = width - ts_margin.left - ts_margin.right
+
+		let height = e.offsetHeight
+		let drawHeight = height - ts_margin.top - ts_margin.bottom
+		
+		let n_ticks = (drawHeight / global_min_height_space) + 1;
+		
+		let parse = d3.timeParse("%s");
+		let fp = d => parse(d - global_time_zone  * 3600)
+
+		let xScale = d3.scaleTime()
+			.domain([fp(global_ts_t0),fp(global_ts_t1)]) 
+			.range([0, drawWidth]); 
+		
+		let yScale = d3.scaleLinear()
+			.domain([mn, mx])
+			.nice()
+			.range([drawHeight, 0]);
+			
+			
+		let yScaleLegend = d3.scaleLinear()
+			.domain([	mn / div, mx / div ])
+			.nice()
+			.range([drawHeight, 0]);
+						
+		d3.select(view.id).select("svg").remove()
+		
+		let svg = d3.select(view.id).append("svg")
+			.attr("width", width)
+			.attr("height", height)
+			.append("g")
+			.attr("transform", "translate(" + ts_margin.left + "," + ts_margin.top + ")");
+			
+		ts_svg = svg
+
+		svg.append("g")
+			.attr("class", "x_axis")
+			.attr("transform", "translate(0," + drawHeight + ")")
+			.call(d3.axisBottom(xScale).tickFormat(
+				function (d,i) { let s = (!i)?"%H:%M:%S": "%H:%M:%S"; let v = d3.timeFormat(s)(d); return v; }
+			)); 
+
+		svg.append("g")
+			.attr("class", "y_axis")
+			.call(d3.axisLeft(yScaleLegend).ticks(n_ticks)); 
+
+		//
+		// Draw lines
+		//
+		let current_line = 0
+
+		let line = d3.line()
+			.defined((d,i) => values[current_line][i]!= 0)
+			.x(function(d, i) { let xp = xScale(fp(ts_times[i])); return xp; }) 
+			.y(function(d, i) { return yScale(values[current_line][i]); }) 
+			.curve(d3.curveMonotoneX) 
+
+		for (current_line = 0; current_line < values.length; current_line ++) {
+			svg.append("path")
+				.datum(ts_times) 
+				.attr('stroke-width', 1)
+				.attr("fill", "none")
+				.attr("stroke", colors[current_line])
+				.attr("d", line); 
+		}
+		
+		let legendSpace = width;		
+		let formatDateTime = d3.timeFormat("%Y-%m-%d");
+		let t0 = fp(global_ts_t0)
+		let yLegend = formatDateTime(t0)
+		svg.append("text")                                    
+				.attr("x", (legendSpace/2)) 
+				.attr("y", drawHeight + 35 ) 
+				.attr("class", "legendX")    
+				.text(yLegend);                    		
+
+		svg.append("text")                                    
+				.attr("x", -drawHeight + ts_margin.bottom) 
+				.attr("y", -42)         
+				.attr("transform", "rotate(-90)" )
+				.attr("class", "legendY")    
+				.text(y_legend);                    		
+	}
+
+
+	//-----------------
+	//
+	//
+	//
+	//
+	function ts_refresh_chart_for_visualization(vi) {
+		let qxx = ts_create_map_query(mymap, "location", global_query_ts_fieldname)
+		view_add_query(vi, qxx, { color: query_ts_color })
+		return vi;
+	}
+	
+
+	//-----------------
+	//
+	//
+	//
+	//
+	function ts_refresh_chart(only_polygons) {
+		let layer, qxx
+		
+		let full_list = only_polygons? false: true
+		//
+		// Time Series chart
+		//
+		let vi = view_add_begin(ts_on_reply,"#chart1", {unity: global_result_unity, title: global_result_title})
+
+		let n_charts = 0;
+	
+		if (full_list) {
+			ts_refresh_chart_for_visualization(vi);
+			n_charts ++;
+			full_list = false;
+		} else {
+			full_list = true;
+		}
+
+		//
+		// Time SeriesPolygons 
+		//
+		mymap.eachLayer((layer) => {
+			if(layer instanceof L.Polygon) {
+
+				// transforms latlngs in poly
+				let poly = []
+				let latlngs = layer._latlngs[0]
+				for (i = 0; i < latlngs.length; i++) {
+					poly.push([latlngs[i].lat, latlngs[i].lng])
+				}
+				let color = layer.options.color
+				color = (color != undefined) ? color : "black"
+
+				// poly timeseries
+				qxx = ts_create_polygon_query(mymap, "location", global_query_ts_fieldname, poly,full_list)
+				view_add_query(vi, qxx, { color: color })
+				full_list = false
+				n_charts ++
+			}
+		});	
+		
+		//
+		if (!n_charts) {
+			ts_refresh_chart_for_visualization(vi);
+		}
+		
+		view_add_end(vi)
+		
+	}
+	
+
+	//********************************************************************
+	//
+	//  Anomaly
+	//
+	//********************************************************************
+
+	
+	//-----------------
+	//
+	//
+	//
+	//
+	function anomaly_create_query(map, geofieldname, timefieldname) {
+		let item = global_anomalies[global_visualization_submode]
+		let s = 
+		'{\
+		\
+		"select": ["##","##"],\
+		"ml.net": [ "!1", "##", "!1" ],\
+		"group-by": "$1",\
+		"group-by-output": "full",\
+		$2,\
+		["$1", "between", $3, $4]'
+			.replace('##',global_query_selected_channel)
+			.replace('##',global_query_selected_channel)
+			.replace('##',global_query_selected_channel)
+			.replace('$1',timefieldname)
+			.replace('$1',timefieldname)
+			.replace('!1',item.alg)
+			.replace('!1',item.params)
+			.replace('$2',query_create_map_where_body(map,geofieldname))
+			.replace('$3',global_ts_t0)
+			.replace('$4',global_ts_t1)
+		//console.log("std time series:",s)
+		return s
+	}
+
+	//-----------------
+	//
+	//
+	//
+	//
+	function anomaly_on_reply(view) {
+		let domId = view.id.substring(1,100)
+		let i, j
+		let ts_times
+		let values = []
+		let colors = []
+		let mx, mn
+
+		for (i = 0; i<view.count; i++) {
+			let js = view.jsons[i];
+			if (js.tp != 5) {
+				ts_times = js.result.ks[0]
+			}
+			for (j = 0; j < view.count; j++) {
+				if (js.id == view.queries[j].id) {
+					colors.push(view.queries[j].info.color)
+					break;
+				}
+			}
+			
+			let vs 
+			vs = js.result.vs[1]
+			values.push(vs)
+
+			// acha os maximos e minimos para a nova serie de valores
+			let m
+			m = d3.max(vs)
+			if (mx == undefined || m > mx) mx = m
+			m = d3.min(vs)
+			if (mn == undefined || (m != 0 && m < mn)) mn = m
+
+			vs = js.result.vs[0]
+			values.push(vs)
+		}
+		
+		// computes best unity
+		best_unity = compute_best_unity(mn,mx)
+		let prefixo = best_unity.prefix
+		let div = best_unity.div
+		
+		let unity = prefixo + view.info.unity
+		let title = view.info.title
+		let y_legend = title + " [" + unity + "]"
+	
+		let e = document.getElementById(domId)
+		let width = e.offsetWidth
+		let drawWidth = width - ts_margin.left - ts_margin.right
+
+		let height = e.offsetHeight
+		let drawHeight = height - ts_margin.top - ts_margin.bottom
+		
+		let n_ticks = (drawHeight / global_min_height_space) + 1;
+		
+		let parse = d3.timeParse("%s");
+		let fp = d => parse(d - global_time_zone * 3600)
+
+		let xScale = d3.scaleTime()
+			.domain([fp(global_ts_t0),fp(global_ts_t1)]) 
+			.range([0, drawWidth]); 
+		
+		let yScale = d3.scaleLinear()
+			.domain([mn, mx])
+			.nice()
+			.range([drawHeight, 0]);
+			
+			
+		let yScaleLegend = d3.scaleLinear()
+			.domain([	mn / div, mx / div ])
+			.nice()
+			.range([drawHeight, 0]);
+						
+		d3.select(view.id).select("svg").remove()
+		
+		let svg = d3.select(view.id).append("svg")
+			.attr("width", width)
+			.attr("height", height)
+			.append("g")
+			.attr("transform", "translate(" + ts_margin.left + "," + ts_margin.top + ")");
+			
+		ts_svg = svg
+
+		svg.append("g")
+			.attr("class", "x_axis")
+			.attr("transform", "translate(0," + drawHeight + ")")
+			.call(d3.axisBottom(xScale).tickFormat(
+				function (d,i) { let s = (!i)?"%H:%M:%S": "%M:%S"; let v = d3.timeFormat(s)(d); return v; }
+			)); 
+
+		svg.append("g")
+			.attr("class", "y_axis")
+			.call(d3.axisLeft(yScaleLegend).ticks(n_ticks)); 
+		//
+		// Draw lines
+		//
+		let line = d3.line()
+			.defined((d,i) => values[0][i]!= 0)
+			.x(function(d, i) { 
+				let xp = xScale(fp(ts_times[i]))
+				return xp; 
+				}) 
+			.y(function(d, i) { return yScale(values[0][i]); }) 
+			.curve(d3.curveMonotoneX) 
+
+		svg.append("path")
+			.datum(ts_times) 
+			.attr('stroke-width', 1)
+			.attr("fill", "none")
+			.attr("stroke", colors[0])
+			.attr("d", line); 
+			
+		svg.selectAll(".dot")
+			.data(values[1])
+			.enter()
+			.append("circle") 
+			.attr("class", "dot") 
+			.attr("cx", function(d, i) { return xScale(fp(ts_times[i])) })
+			.attr("cy", function(d, i)  { return yScale(values[1][i]) })
+			.attr("r", d => d!=0? global_anomaly_circle_radius: 0)
+			
+		let legendSpace = width;		
+		let formatDateTime = d3.timeFormat("%Y-%m-%d");
+		let t0 = fp(global_ts_t0)
+		let yLegend = formatDateTime(t0)
+		svg.append("text")                                    
+				.attr("x", (legendSpace/2)) 
+				.attr("y", drawHeight + 35 ) 
+				.attr("class", "legendX")    
+				.text(yLegend);                    		
+
+		svg.append("text")                                    
+				.attr("x", -drawHeight + ts_margin.bottom) 
+				.attr("y", -42)         
+				.attr("transform", "rotate(-90)" )
+				.attr("class", "legendY")    
+				.text(y_legend)			
+	}
+
+	//-----------------
+	//
+	//
+	//
+	//
+	function anomaly_refresh_chart () {
+		let layer
+		
+		//
+		// Anomaly chart
+		//
+		let full_list = true
+		let vi = view_add_begin(anomaly_on_reply,"#chart1", {unity: global_result_unity, title: global_result_title})
+		let qxx = anomaly_create_query(mymap, "location", global_query_ts_fieldname)
+// 		console.log(qxx)
+		view_add_query(vi, qxx, { color: query_ts_color })
+		full_list = false
+
+		view_add_end(vi)
+	}
+	
+	//********************************************************************
+	//
+	//  Bounds
+	//
+	//********************************************************************
+
+	let bounds_field;
+
+	//-----------------
+	//
+	//
+	//
+	//
+	function bounds_create_query(field, zoom) {
+		field = field || global_query_ts_fieldname
+		zoom = zoom || 17
+		let s = 
+		'{ "bounds": "##", "where": [["location", "zrect", @, 85, -179, -85, 179]], "dummy": [1'
+			.replace('##',field)
+			.replace('@',zoom)
+		return s
+	}
+
+	//-----------------
+	//
+	//
+	//
+	//
+	function bounds_on_reply(view) {
+		let js = view.jsons[0];
+		if (view.info.field == global_query_ts_fieldname) {
+			global_ts_t0 = js.result.vs[0][0];
+			global_ts_t1 = js.result.vs[1][0];
+			
+			setTimeout(refreshInterface, 300);
+			
+		} else if (view.info.field == "location") {
+			let vs = js.result.vs
+
+			let zoom = view.info.zoom 
+			
+			let tile_top = vs[0][0]
+			let tile_left = vs[0][1]
+			let tile_bottom = vs[1][0]
+			let tile_right = vs[1][1]
+
+			let lon0 = tile2long(tile_left,zoom)
+			let lon1 = tile2long(tile_right,zoom)
+			let lat0 = tile2lat(tile_top,zoom)
+			let lat1 = tile2lat(tile_bottom,zoom)
+			
+			
+			mymap.fitBounds([[lat0,lon0],[lat1,lon1]])
+			let c_lat = (lat1 + lat0) / 2
+			let c_lon = (lon1 + lon0) / 2
+			
+			//mymap.setView([c_lat, c_lon], 5)
+			
+			//console.log(lat0,lon0,lat1,lon1)
+			
+			
+		}
+	}
+	
+	//-----------------
+	//
+	//
+	//
+	//
+	function bounds_refresh_chart (fieldname, zoom) {
+		let layer
+		let vi = view_add_begin(bounds_on_reply,"", {unity: global_result_unity, title: global_result_title, field: fieldname, zoom: zoom })
+		let qxx = bounds_create_query(fieldname, zoom)
+		view_add_query(vi, qxx, { color: query_ts_color })
+		view_add_end(vi)
+	}
+	
+	
+	//********************************************************************
+	//
+	//  Prediction
+	//
+	//********************************************************************
+
+	//-----------------
+	//
+	//
+	//
+	//
+	function prediction_create_query(map, geofieldname, timefieldname) {
+		let item = global_predictions[global_visualization_submode]
+		let s = 
+		'{\
+		\
+		"select": ["##","##"],\
+		"ml.net": [ "!1", "##" ],\
+		"group-by": "$1",\
+		"group-by-output": "full",\
+		$2,\
+		["$1", "between", $3, $4]'
+			.replace('##',global_query_selected_channel)
+			.replace('##',global_query_selected_channel)
+			.replace('##',global_query_selected_channel)
+			.replace('$1',timefieldname)
+			.replace('$1',timefieldname)
+			.replace('!1',item.alg)
+			.replace('$2',query_create_map_where_body(map,geofieldname))
+			.replace('$3',global_ts_t0)
+			.replace('$4',global_ts_t1)
+		//console.log("std time series:",s)
+		return s
+	}
+
+	//-----------------
+	//
+	//
+	//
+	//
+	function prediction_on_reply(view) {
+		let domId = view.id.substring(1,100)
+		let i, j
+		let ts_times
+		let values = []
+		let colors = []
+		let mx, mn
+
+		for (i = 0; i<view.count; i++) {
+			let js = view.jsons[i];
+			if (js.tp != 5) {
+				ts_times = js.result.ks[0]
+			}
+			for (j = 0; j < view.count; j++) {
+				if (js.id == view.queries[j].id) {
+					colors.push(view.queries[j].info.color)
+					break;
+				}
+			}
+			
+			let vs 
+			vs = js.result.vs[1]
+			values.push(vs)
+
+			// acha os maximos e minimos para a nova serie de valores
+			let m
+			m = d3.max(vs)
+			if (mx == undefined || m > mx) mx = m
+			m = d3.min(vs)
+			if (mn == undefined || (m != 0 && m < mn)) mn = m
+
+			vs = js.result.vs[0]
+			values.push(vs)
+		}
+		
+		// computes best unity
+		best_unity = compute_best_unity(mn,mx)
+		let prefixo = best_unity.prefix
+		let div = best_unity.div
+		
+		let unity = prefixo + view.info.unity
+		let title = view.info.title
+		let y_legend = title + " [" + unity + "]"
+	
+		let e = document.getElementById(domId)
+		let width = e.offsetWidth
+		let drawWidth = width - ts_margin.left - ts_margin.right
+
+		let height = e.offsetHeight
+		let drawHeight = height - ts_margin.top - ts_margin.bottom
+		
+		let n_ticks = (drawHeight / global_min_height_space) + 1;
+		
+		let parse = d3.timeParse("%s");
+		let fp = d => parse(d - global_time_zone * 3600)
+
+		let xScale = d3.scaleTime()
+			.domain([fp(global_ts_t0),fp(global_ts_t1)]) 
+			.range([0, drawWidth]); 
+		
+		let yScale = d3.scaleLinear()
+			.domain([mn, mx])
+			.nice()
+			.range([drawHeight, 0]);
+			
+			
+		let yScaleLegend = d3.scaleLinear()
+			.domain([	mn / div, mx / div ])
+			.nice()
+			.range([drawHeight, 0]);
+						
+		d3.select(view.id).select("svg").remove()
+		
+		let svg = d3.select(view.id).append("svg")
+			.attr("width", width)
+			.attr("height", height)
+			.append("g")
+			.attr("transform", "translate(" + ts_margin.left + "," + ts_margin.top + ")");
+			
+		ts_svg = svg
+
+		svg.append("g")
+			.attr("class", "x_axis")
+			.attr("transform", "translate(0," + drawHeight + ")")
+			.call(d3.axisBottom(xScale).tickFormat(
+				function (d,i) { let s = (!i)?"%H:%M:%S": "%M:%S"; let v = d3.timeFormat(s)(d); return v; }
+			)); 
+
+		svg.append("g")
+			.attr("class", "y_axis")
+			.call(d3.axisLeft(yScaleLegend).ticks(n_ticks)); 
+
+		//
+		// Draw lines
+		//
+		let line_actual = d3.line()
+			.defined(function (d,i) { return values[0][i]; })
+			.x(function(d, i) { return xScale(fp(ts_times[i])); }) 
+			.y(function(d, i) { return yScale(values[0][i]); }) 
+			.curve(d3.curveMonotoneX) 
+
+		svg.append("path")
+			.datum(ts_times) 
+			.attr("class", "line_actual") 
+			.attr("d", line_actual); 
+
+		let line_predicted = d3.line()
+			.defined(function (d,i) { let ok = values[1][i] > 0; if (!i) return ok; return ok && values[1][i-1]>0; })
+			.x(function(d, i) { return xScale(fp(ts_times[i])); }) 
+			.y(function(d, i) { return yScale(values[1][i]); }) 
+			.curve(d3.curveMonotoneX) 
+
+		svg.append("path")
+			.datum(ts_times) 
+			.attr("class", "line_predicted") 
+			.attr("d", line_predicted); 
+
+		let legendSpace = width;		
+		let formatDateTime = d3.timeFormat("%Y-%m-%d");
+		let t0 = fp(global_ts_t0)
+		let yLegend = formatDateTime(t0)
+		svg.append("text")                                    
+				.attr("x", (legendSpace/2)) 
+				.attr("y", drawHeight + 35 ) 
+				.attr("class", "legendX")    
+				.text(yLegend);                    		
+
+		svg.append("text")                                    
+				.attr("x", -drawHeight + ts_margin.bottom) 
+				.attr("y", -42)         
+				.attr("transform", "rotate(-90)" )
+				.attr("class", "legendY")    
+				.text(y_legend)			
+			
+	}
+
+	//-----------------
+	//
+	//
+	//
+	//
+	function prediction_refresh_chart () {
+		let layer
+		let vi = view_add_begin(prediction_on_reply,"#chart1", {unity: global_result_unity, title: global_result_title})
+		let qxx = prediction_create_query(mymap, "location", global_query_ts_fieldname)
+		view_add_query(vi, qxx, { color: query_ts_color })
+		view_add_end(vi)
+	}
+	
+
+	//********************************************************************
+	//
+	// Refresh Interface
+	//
+	//********************************************************************
+	
+	//-----------------
+	//
+	//
+	//
+	//
+	function refreshInterface (withSchema) {
+
+		if (!view_alter_pendings(0)) return 
+		
+		// console.log("refreshing!")
+		
+		global_trace_mode = document.getElementById("trace").value
+	
+		view_reset_queries()
+		
+		geo_refresh_chart()
+		
+		let vclass = Math.floor(global_visualization_mode / 10)
+		global_visualization_submode = global_visualization_mode % 10
+		
+		if (!global_visualization_mode || vclass == 1) {
+			ts_refresh_chart(global_visualization_submode==1)
+
+		} else if (vclass == 2) {
+			anomaly_refresh_chart() 
+			
+		} else if (vclass == 3) {
+			prediction_refresh_chart()
+		}
+		
+		cat_refresh_chart(vclass==1 && global_visualization_submode==1)
+	}
+	
+	
+	//********************************************************************
+	//
+	//  Schema
+	//
+	//********************************************************************
+
+	//-----------------
+	//
+	//
+	//
+	//
+	function loadML() {
+		let cb = document.getElementById("modo")
+		let option, value
+		let ml = global_schema_info["ml.net"]
+		// console.log(ml)
+		let a, i 
+		a = ml.anomaly
+		global_anomalies = []
+		for (i = 0; i < a.length; i++) {
+			let item = { alg: a[i].alg, params: a[i].params }
+			global_anomalies.push(item)
+
+			option = document.createElement("option")
+			option.value = 20 + i
+			let caption = a[i].caption || a[i].alg 
+			value = document.createTextNode("Anomaly: "+ caption)
+			option.appendChild(value)
+			cb.appendChild(option)
+		}
+
+		a = ml.prediction
+		global_predictions = []
+		for (i = 0; i < a.length; i++) {
+			let item = { alg: a[i].alg }
+			global_predictions.push(item)
+
+			option = document.createElement("option")
+			option.value = 30 + i
+			let caption = a[i].caption || a[i].alg 
+			value = document.createTextNode("Prediction: "+ caption)
+			option.appendChild(value)
+			cb.appendChild(option)
+		}
+		
+	}
+	
+	//-----------------
+	//
+	//
+	//
+	//
+	function onResultOptions() {
+		let cb = document.getElementById("resultOptions")
+		let e = cb.options[cb.selectedIndex];
+		global_result_title = e.caption
+		global_result_unity = e.unity
+		global_query_selected_channel = e.schema_id
+		refreshInterface()
+		
+	}
+	
+	//-----------------
+	//
+	//
+	//
+	//
+	function loadResultOptions() {
+		let cb = document.getElementById("resultOptions")
+		
+		let option, value
+		let contents = global_schema_info.terminal.contents
+		
+		let i, j
+		for (i=0; i<contents.length; i++) {
+			if (contents[i].id == global_query_ts_fieldname && contents[i].contents) {
+				contents = contents[i].contents
+				for (j=0; j<contents.length;j++) {
+					option = document.createElement("option")
+					let caption = contents[j].caption || contents[j].id
+					option.caption = caption
+					option.order = j
+					option.unity = contents[j].unity || ""
+					option.schema_id = contents[j].id
+					value = document.createTextNode(caption)
+					option.appendChild(value)
+					cb.appendChild(option)
+				}
+				cb.selectedIndex = 1;
+				setTimeout(onResultOptions,1000)
+				break;
+			}
+		}
+	}
+	
+	
+
+	//-----------------
+	//
+	//
+	//
+	//
+	function schema_create_query(map, geofieldname, timefieldname) {
+		let s = '{"schema": [1 '
+		return s
+	}
+	
+
+	//-----------------
+	//
+	//
+	//
+	//
+	function schema_handle_query(view) {
+		global_schema_info = view.jsons[0].result
+		
+		// console.log(global_schema_info)
+		let js = global_schema_info.dimensions
+		let i
+		for (i =0; i< js.length; i++) {
+			let d = js[i]
+			if (d.class[0] == "cat") {
+				global_schema_categories.push(d)
+			}
+		}
+		
+		loadML()
+		loadResultOptions()
+		
+		// console.log(view)
+		if (view.info) {
+			setTimeout(refreshInterface, 500);
+		}
+	}
+	
+
+	//-----------------
+	//
+	//
+	//
+	//
+	function getSchema (refresh) {
+		let layer
+	
+		view_reset_queries()
+	
+		let vi = view_add_begin(schema_handle_query, "", refresh)
+		let qxx = schema_create_query()
+		view_add_query(vi, qxx)
+		view_add_end(vi)
+	}
+	
+	
+	//********************************************************************
+	//
+	// Leaflet Draw
+	//
+	//********************************************************************
+	
+	// mymap.add
+
+	// Initialise the FeatureGroup to store editable layers
+	var editableLayers = new L.FeatureGroup();
+	mymap.addLayer(editableLayers);
+
+	let drawColors = ['#a6cee3', '#1f78b4', '#b2df8a', '#33a02c', '#fb9a99', '#e31a1c', '#fdbf6f', '#ff7f00', '#cab2d6', '#6a3d9a', '#ffff99', '#8dd3c7', '#fb8072', '#80b1d3', '#fdb462', '#b3de69', '#fccde5', '#bc80bd', '#ccebc5','#b15928']
+	let drawColorIndex = 0
+
+	function doUpdateDrawColors() {
+		drawControl.setDrawingOptions({
+			rectangle: {
+				shapeOptions: {
+					color: drawColors[drawColorIndex]
+				}
+			},
+			polygon: {
+				shapeOptions: {
+					color: drawColors[drawColorIndex]
+				}
+			}
+			
+		});
+	}
+	
+	
+	function setNextDrawColor(map) {
+		let used = []
+		let layer
+		map.eachLayer((layer) => {
+			if(layer instanceof L.Polygon) {
+				let color = layer.options.color
+				//console.log(color)
+				if (drawColors.indexOf(""+color) != -1) {
+					used.push(color)
+				} else {
+					//console.log(drawColors)
+				}
+			}
+		});	
+		
+		//console.log("used",used)
+		let i = 0
+		if (used.length > 0) {
+			for (let i = 0; i < drawColors.length; i++) {
+				if (used.indexOf(drawColors[i]) == undefined) {
+					drawColorIndex = i;
+				}
+			}
+		}
+		drawColorIndex = (drawColorIndex + 1) % drawColors.length;
+		//console.log("used, drawColorIndex",used,drawColorIndex)
+	}
+	
+	function updateDrawColors() {
+		setNextDrawColor(mymap)
+		doUpdateDrawColors()
+	}
+	
+	let drawControl = new L.Control.Draw({
+	  position: 'topleft',
+	  draw: {
+		polygon: {
+		  allowIntersection: false, // Restricts shapes to simple polygons
+		  drawError: {
+			color: '#e1e100', // Color the shape will turn when intersects
+			message: '<strong>Oh snap!<strong> you can\'t draw that!' // Message that will show when intersect
+		  },
+		},
+		// disable toolbar item by setting it to false
+		rectangle: true,
+		polyline: false,
+		circle: false, // Turns off this drawing tool
+		marker: false,
+		},
+	  edit: {
+		featureGroup: editableLayers, //REQUIRED!!
+		remove: true
+	  }
+	});
+	
+	mymap.addControl(drawControl);
+
+
+	function geo_add_polygon(poly) {
+		let polygon = new L.Polygon(poly);
+		polygon.addTo(editableLayers);
+		setNextDrawColor(mymap);
+	}
+	
+	
+	doUpdateDrawColors();
+
+	// geo_add_polygon(poly_sul);
+	// geo_add_polygon(poly_norte);
+
+	//********************************************************************
+	//
+	// Time range
+	//
+	//********************************************************************
+	time_scales = [
+		{ diff:     60,     idiv:      60 },  // 60 seconds
+		{ diff:    360,    idiv:      360 },  // 6 minutos seconds
+	]
+	
+	function time_nice(t0, t1) {
+		
+		// console.log("In:", t0,t1)
+
+		let dt0 = new Date(0); // The 0 there is the key, which sets the date to the epoch
+		let Y0,M0,D0,h0,m0,s0 
+		dt0.setUTCSeconds(t0);
+		s0 = dt0.getSeconds()
+		m0 = dt0.getMinutes()
+		h0 = dt0.getHours()
+		D0 = dt0.getDate()
+		M0 = dt0.getMonth()
+		Y0 = dt0.getYear()
+
+		let dt1 = new Date(0); // The 0 there is the key, which sets the date to the epoch
+		let Y1, M1, D1, h1, m1, s1 
+		dt1.setUTCSeconds(t0);
+		s1 = dt1.getSeconds()
+		m1 = dt1.getMinutes()
+		h1 = dt1.getHours()
+		D1 = dt1.getDate()
+		M1 = dt1.getMonth()
+		Y1 = dt1.getYear()
+
+		let d = t1 - t0
+		let changed = 0
+		if (d < 180) {
+			if (s0 > 0) { t0 -= s0     ; s0 = 0; changed=1}
+			if (s1 > 0) { t1 += 60 - s1;  s1 = 0; changed=1 }
+		} else if (d < 360) {
+			if (s0 > 0) { t0 -= s0     ; s0 = 0; changed=1}
+			if (s1 > 0) { t1 += 60 - s1;  s1 = 0; changed=1 }
+			let x 
+			x = m0 % 5
+			if (x != 0) { t0 -= x * 60; m0 -= x; changed=1 }
+			x = m1 % 5
+			if (x != 0) { t1 -= x * 60; m1 -= x; changed=1; }
+		} else if (d < 600) {
+			if (s0 > 0) { t0 -= s0     ; s0 = 0; changed=1}
+			if (s1 > 0) { t1 += 60 - s1;  s1 = 0; changed=1 }
+			let x 
+			x = m0 % 5
+			if (x != 0) { t0 -= x * 60; m0 -= x; changed=1 }
+			x = m1 % 5
+			if (x != 0) { t1 -= x * 60; m1 -= x; changed=1; }
+		}
+		
+		if (changed) {
+			let o0 = new Date(0)
+			o0.setSeconds(s0)
+			o0.setMinutes(m0)
+			o0.setHours(h0)
+			o0.setDate(D0)
+			o0.setMonth(M0)
+			o0.setYear(Y0)
+			
+			let o1 = new Date(0)
+			o1.setSeconds(s1)
+			o1.setMinutes(m1)
+			o1.setHours(h1)
+			o1.setDate(D1)
+			o1.setMonth(M1)
+			o1.setYear(Y1)
+			
+			console.log(o1)
+			//t0 = o0.UTC() / 1000
+			//t1 = o1.UTC() / 1000
+		}
+		// console.log("Out:", t0,t1)
+		result = { t0: t0, t1: t1 }
+		return result
+	}
+	
+	//********************************************************************
+	//
+	// Map events
+	//
+	//********************************************************************
+	mymap.on('zoomend', function(ev) {
+	//console.log("zoom")
+//		refreshInterface();
+	});
+
+	mymap.on('moveend', function(ev) {
+		refreshInterface();
+	});
+
+
+	mymap.on(L.Draw.Event.CREATED, function(e) {
+	  var type = e.layerType,
+		layer = e.layer;
+
+	  if (type === 'marker') {
+		layer.bindPopup('A popup!');
+	  }
+
+	  editableLayers.addLayer(layer);
+	});
+	
+	mymap.on(L.Draw.Event.EDITED, function (e) {
+		window.setTimeout(function() { refreshInterface() }, 100)
+    });	
+	
+	mymap.on("draw:created", function (e) {
+		setNextDrawColor(mymap);
+		
+		updateDrawColors()
+		window.setTimeout(function() { refreshInterface() }, 100)
+	})
+
+	mymap.on("draw:deleted", function (e) {
+		window.setTimeout(function() { refreshInterface() }, 100)
+	})
+	
+	function onVisualizationChange() {
+		let e = document.getElementById("modo")
+		let modo = e.value
+		global_visualization_mode = modo
+		refreshInterface()
+	}
+
+	function onBounds() {
+		let e = document.getElementById("bounds")
+		e.value = 0;
+		bounds_refresh_chart(global_query_ts_fieldname)
+		bounds_refresh_chart("location",24)
+	}
+	
+	function onClickTime(id) {
+		let e = document.getElementById(id)
+		
+		let d = (global_ts_t1 - global_ts_t0) 
+		let small = 20
+		let midi = 10
+		let large = 2
+		
+		if (id == "NextSmall") {
+			d = d / small
+		} else if (id == "PrevSmall") {
+			d = - d / small
+		} else if (id == "NextMidi") {
+			d = d / midi
+		} else if (id == "PrevMidi") {
+			d = - d / midi
+		} else if (id == "NextLarge") {
+			d = d / large
+		} else if (id == "PrevLarge") {
+			d = - d / large
+		} else if (id == "ZoomIn") {
+//			console.log(d)
+			d >>= 1
+			let tmid = global_ts_t0 + d
+//			console.log(d, tmid)
+			d >>= 1
+			let t0 = tmid - d
+			t0 = t0 - (t0 % 10)
+			let t1 = tmid + d
+			if (t0 >= t1) t1 = t0 + 1
+	//		console.log(d, tmid, t0, t1)
+			global_ts_t0 = t0
+			global_ts_t1 = t1
+			d = 0
+		} else if (id == "ZoomOut") {
+			d >>= 1
+			let tmid = global_ts_t0 + d
+			d <<= 1
+			let t0 = tmid - d
+			let t1 = tmid + d
+			global_ts_t0 = t0
+			global_ts_t1 = t1
+			d = 0
+		}
+		
+		d = Math.floor(d)
+		let t0 = global_ts_t0 + d
+		let t1 = global_ts_t1 + d
+		let tnice = time_nice(t0, t1)
+		
+		global_ts_t0 = tnice.t0
+		global_ts_t1 = tnice.t1 
+		
+		refreshInterface()
+	}
+
+	
+//********************************************************************
+//
+//
+//
+//********************************************************************
+
+	global_refresh_interface = refreshInterface
+	getSchema(true)
+	onBounds()
+
+	
+</script>
+</body>
